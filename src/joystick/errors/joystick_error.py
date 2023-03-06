@@ -1,0 +1,2 @@
+class JoystickError(Exception):
+    pass

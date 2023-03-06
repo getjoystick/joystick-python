@@ -1,0 +1,13 @@
+graft src
+graft ci
+graft tests
+
+include .editorconfig
+include .github/workflows/github-actions.yml
+include nox.py
+
+include CHANGELOG.md
+include LICENSE.md
+include README.md
+
+global-exclude *.py[cod] __pycache__/* *.so *.dylib

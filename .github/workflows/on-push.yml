@@ -1,0 +1,7 @@
+name: 'Code verification'
+on: [push, pull_request]
+jobs:
+    verification:
+        uses: ./.github/workflows/verification.yml
+
+

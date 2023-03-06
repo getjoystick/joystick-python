@@ -1,0 +1,7 @@
+[project]
+name = 'joystick-with-redis-cache-example'
+version = '0.0.1'
+dependencies = ["setuptools", "joystick-python", "redis>=4.1.0,<5.0.0", "aiohttp>=3.8.4,<4.0.0"]
+
+[tool.setuptools]
+py-modules = []

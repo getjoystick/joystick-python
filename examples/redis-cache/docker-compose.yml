@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  cache:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass CbwK98r6JMpo
+    volumes:
+      - cache:/data
+
+  app:
+    build: .
+    restart: always
+    scale: 3
+    environment:
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=CbwK98r6JMpo
+      - JOYSTICK_API_KEY=${JOYSTICK_API_KEY}
+      - JOYSTICK_CONFIG_ID=${JOYSTICK_CONFIG_ID}
+      
+    volumes:
+      - .:/app
+
+  loadbalancer: 
+    image: nginx:1.23-alpine
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx-lb.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+volumes:
+  cache:
+    driver: local

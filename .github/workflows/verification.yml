@@ -1,0 +1,52 @@
+name: Code Verification
+on: [workflow_call]
+jobs:
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+            pip install --upgrade pip
+            python -mpip install --progress-bar=off -r ci/requirements.txt
+            virtualenv --version
+            pip --version
+            nox --version
+            pip list --format=freeze
+      - name: Lint
+        run: |
+          nox -e lint -v
+  test:
+    name: ${{ matrix.os }}, ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: install dependencies
+        run: |
+          pip install --upgrade pip
+          python -mpip install --progress-bar=off -r ci/requirements.txt
+          virtualenv --version
+          pip --version
+          nox --version
+          pip list --format=freeze
+      - name: test
+        run: |
+          nox -p ${{ matrix.python }} -e test -v
