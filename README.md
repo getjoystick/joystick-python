@@ -1,4 +1,4 @@
-# Pythong client for [Joystick](https://www.getjoystick.com/)
+# Python client for [Joystick](https://www.getjoystick.com/)
 
 [![GitHub Actions](https://github.com/getjoystick/joystick-python/actions/workflows/on-publishing.yml/badge.svg)](<(https://github.com/getjoystick/joystick-python/actions?query=branch%3Amain)>)
 [![Latest Stable Version](https://img.shields.io/pypi/v/joystick-python.svg)](https://pypi.org/project/joystick-python)
@@ -7,7 +7,7 @@
 [![Supported implementations](https://img.shields.io/pypi/implementation/joystick-python.svg)](https://pypi.org/project/joystick-python)
 [![License](https://img.shields.io/pypi/l/joystick-python.svg)](https://pypi.org/project/joystick-python)
 
-This is the library that simplifies the way how you can communicate with [Joystick API](https://docs.getjoystick.com/).
+This is a library that simplifies communicating with the [Joystick API](https://docs.getjoystick.com/) for using remote configs with your Python project. Joystick is a modern remote config platform where you manage all of your configurable parameters. We are natively multi-environment, preserve your version history, have advanced work-flow & permissions management, and much more. Have one API to use for any JSON configs.
 
 ## Installation
 
@@ -19,8 +19,7 @@ pip install joystick-python
 
 ## Usage
 
-We provide two types of clients: asynchronous and synchronous. They have exactly the same interfaces,
-the only difference is a way you import them.
+We provide two types of clients: asynchronous and synchronous. They have exactly the same interfaces, the only difference is how you import them.
 
 ### Async / Sync
 
@@ -75,10 +74,11 @@ asyncio.run(main())
 
 ```
 
-> All examples below will be provided for `async` version of the client. For sync it's enough to
-> use proper Client and avoid `await` keyword
+> All examples below will be provided for the `async` version of the client. For sync version, import the sync client, and drop the `await` keyword.
 
-### Requesting content by single Content Id
+### Requesting config content by ContentId
+
+#### Get a single config
 
 ```python
 ...
@@ -86,11 +86,16 @@ await client.get_content('cid1')
 ...
 ```
 
-### Specifying additional parameter
+#### Get multiple configs at the same time
 
-When creating the `Client`/`AsyncClient` instance, you can specify additional parameters which will
-be used by all API calls from the client, for more details see
-[API documentation](https://docs.getjoystick.com/api-reference/):
+```python
+...
+await client.get_contents({'cid1', 'cid2'})
+...
+```
+### Specifying Additional Parameters
+
+When creating the `Client`/`AsyncClient` instance, you can specify additional parameters that will be used by all API calls from the client. These params can be used for ab testing and/or segmentation; different audiences can get customized responses. For more details see [API documentation](https://docs.getjoystick.com/api-reference/):
 
 ```python
 client = AsyncClient(
@@ -110,8 +115,9 @@ client = AsyncClient(
 
 #### `full_response`
 
-In most of the cases you will be not interested in the full response from the API, but if you're you can specify
-`fullResponse` option to the client methods. The client will return you raw API response:
+The full response from Joystick includes additional meta-data about segmentation and ab test groups. By default, you will not get the full response. For more details see [Dynamic Config Content documentation](https://docs.getjoystick.com/dynamic-content-key-concepts/).
+
+If you want the full response, specify `fullResponse` option to the client methods.
 
 ```python
 get_content_response = await client.get_content('cid1', full_response=True)
@@ -121,8 +127,9 @@ get_contents_response = await client.get_contents({'cid1'}  , full_response=True
 
 #### `serialized`
 
-When `true`, we will pass query parameter `responseType=serialized`
-to [Joystick API](https://docs.getjoystick.com/api-reference-combine/).
+You can get your configuration content as a serialized JSON string.
+
+When `true`, we will pass the query parameter `responseType=serialized` to [Joystick API](https://docs.getjoystick.com/api-reference-combine/).
 
 ```python
 get_content_response = await client.get_content('cid1', serialized=True)
@@ -130,8 +137,7 @@ get_content_response = await client.get_content('cid1', serialized=True)
 get_contents_response = await client.get_contents({'cid1'}  , serialized=True)
 ```
 
-This option can be set for every API call from the client by setting `serialized` as `true` via
-constructor, or via propert setter.
+This option can be set for every API call from the client by setting `serialized` as `true` via the constructor, or via property setter.
 
 ```python
 client = AsyncClient(
@@ -142,7 +148,7 @@ client = AsyncClient(
 
 #### `refresh`
 
-If you want to ignore existing cache and request the new config – pass this option as `true`.
+If you want to ignore the existing cache and request the new config – pass this option as `true`.
 
 ```python
 get_content_response = await client.get_content('cid1', refresh=True)
@@ -152,18 +158,13 @@ get_contents_response = await client.get_contents({'cid1'}  , refresh=True)
 
 ### Caching
 
-By default, the client uses [in-memory caching](./src/joystick/_async/cache/in_memory.py),
-which means that if you build the distributed application, every instance will go to the Joystick
-API for at least first call and the cache will be erased after the application is closed.
+By default, the client uses [in-memory caching](./src/joystick/_async/cache/in_memory.py), which means that if you build the distributed application, every instance will go to the Joystick API for at least first call and the cache will be erased after the application is closed.
 
-You can specify your cache implementation which implements either
-[`AsyncCacheInterface`](./src/joystick/_async/cache/cache.py) if you use `AsyncClient`,
-or [`SyncCacheInterface`](./src/joystick/_sync/cache/cache.py) if you use `SyncClient`.
+You can specify your cache implementation which implements either [`AsyncCacheInterface`](./src/joystick/_async/cache/cache.py) if you use `AsyncClient`, or [`SyncCacheInterface`](./src/joystick/_sync/cache/cache.py) if you use `SyncClient`.
 
 ### Async support
 
-We rely on library [`httpx`](https://www.python-httpx.org/) to make requests to Joystick API and we
-support the [same platforms as `httpx`](https://www.python-httpx.org/async/#supported-async-environments).
+We rely on library [`httpx`](https://www.python-httpx.org/) to make requests to Joystick API and we support the [same platforms as `httpx`](https://www.python-httpx.org/async/#supported-async-environments).
 
 #### Clear the cache
 
